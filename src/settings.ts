@@ -3,6 +3,7 @@ import { sponsorsSettingItems } from './license/github-obsidian';
 import { DEFAULT_MAPPING, validateFolder, validateMapping, type Mapping } from './importer';
 import { PRO_UI } from './pro';
 import type SubstackExportImportPlugin from './main';
+import { helloSettingItems } from './hello/settings';
 
 export interface Profile { name: string; folder: string; mapping: Mapping }
 export interface SubstackExportImportSettings { profiles: Profile[] }
@@ -25,6 +26,11 @@ export function normalizeSettings(saved: unknown): SubstackExportImportSettings 
 export class SubstackExportImportSettingTab extends PluginSettingTab {
 	constructor(app: ConstructorParameters<typeof PluginSettingTab>[0], readonly owner: SubstackExportImportPlugin) { super(app, owner); }
 	getSettingDefinitions(): SettingDefinitionItem[] {
+		// The product rows, then the "More from NoteMods" card (packages/hello).
+		return [...this.productSettingDefinitions(), ...helloSettingItems()];
+	}
+
+	productSettingDefinitions(): SettingDefinitionItem[] {
 		return [
 			{ name: 'Local import', desc: 'Use Import writer export from the command palette. Choose one ZIP, check its preview, then create a new folder.' },
 			...(this.owner.pro ? sponsorsSettingItems(this.owner.pro, PRO_UI) : []),

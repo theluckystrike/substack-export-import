@@ -1,7 +1,7 @@
 {
 	"id": "substack-export-import",
 	"name": "Substack Export Import",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"minAppVersion": "1.13.4",
 	"description": "Import Substack writer exports as notes with post bodies, dates, and publication fields.",
 	"author": "Michael Lip",

@@ -59,6 +59,8 @@ A successful import writes post notes, `Import report.md`, and a body snapshot. 
 
 ## Settings
 
+After a minor or major update, this plugin opens one What's new tab in the background. The tab and settings card suggest other NoteMods plugins and Zovo Chat and link to notemods.com for feedback ([privacy](https://notemods.com/privacy/)). The tab sends no data. Turn the tab off in Settings.
+
 The plugin settings contain the GitHub Sponsors controls and a count of saved profiles. Import controls are in the command window. Property names must start with a lowercase letter and contain lowercase letters, digits, or the underscore character. Names must be different. `post_id` and `source_html` are reserved.
 
 The ZIP limit is 30 MiB. Selected uncompressed CSV and HTML text has a combined limit of 50 MiB, and the archive has a limit of 12,000 members. Unsafe member paths stop preview, including unsafe paths in ignored files. Output paths cannot use hidden folders, parent path segments, or reserved Windows names.
