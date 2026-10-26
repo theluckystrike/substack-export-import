@@ -9,6 +9,37 @@ const podcast = Array.from(readFileSync('tests/fixtures/substack-podcast.zip'));
 
 /** Await actual DOM and vault state. Do not use a sleep or a theme selector. */
 describe('writer export import', () => {
+	it('a free user who clicks Save profile or Compare bodies gets a Pro notice with a Sponsor button', async () => {
+		await browser.executeObsidian(({ app }) => {
+			const p = (app as unknown as { plugins: { plugins: Record<string, Plugin> } }).plugins.plugins['substack-export-import']!;
+			p.pro?.signOut();
+			document.querySelectorAll('.notice').forEach((n) => n.remove());
+		});
+		await browser.executeObsidianCommand(`${pluginId}:import-export`);
+		await browser.waitUntil(async () => await browser.$('input[aria-label="Writer export zip"]').isExisting());
+		await browser.$('input[aria-label="Writer export zip"]').setValue(resolve('tests/fixtures/substack-example.zip'));
+		await browser.waitUntil(async () => (await browser.$('.substack-import-counts').isExisting()), { timeout: 20000, timeoutMsg: 'The ZIP preview did not finish.' });
+		const notices = () => browser.executeObsidian(() => [...document.querySelectorAll('.notice')].map((n) => ({ text: n.textContent ?? '', buttons: n.querySelectorAll('.pf-pro-notice-sponsor').length })));
+		await browser.$('button=Save profile').click();
+		await browser.waitUntil(async () => (await notices()).some((n) => n.text.includes('Pro saves and loads')), { timeout: 5000, timeoutMsg: 'No Pro notice after Save profile.' });
+		const save = (await notices()).find((n) => n.text.includes('Pro saves and loads'))!;
+		expect(save.text).toContain('Pro saves and loads field mappings and folder profiles. Sponsor on GitHub, then sign in from the plugin settings.');
+		expect(save.buttons).toBe(1);
+		await browser.$('button=Compare bodies').click();
+		await browser.waitUntil(async () => (await notices()).some((n) => n.text.includes('Pro compares post bodies')), { timeout: 5000, timeoutMsg: 'No Pro notice after Compare bodies.' });
+		const compare = (await notices()).find((n) => n.text.includes('Pro compares post bodies'))!;
+		expect(compare.text).toContain('Pro compares post bodies with an earlier import. Sponsor on GitHub, then sign in from the plugin settings.');
+		expect(compare.buttons).toBe(1);
+		const after = await browser.executeObsidian(({ app }) => {
+			const p = (app as unknown as { plugins: { plugins: Record<string, Plugin> } }).plugins.plugins['substack-export-import']!;
+			const profiles = p.settings.profiles.length;
+			for (const m of [...p.activeImports]) m.close();
+			document.querySelectorAll('.notice').forEach((n) => n.remove());
+			return { profiles, folder: !!app.vault.getAbstractFileByPath('Substack import') };
+		});
+		expect(after).toEqual({ profiles: 0, folder: false });
+	});
+
 	it('selects a local ZIP in the modal and creates the report and body', async () => {
 		await browser.executeObsidianCommand(`${pluginId}:import-export`);
 		await browser.waitUntil(async () => await browser.$('input[aria-label="Writer export zip"]').isExisting());
@@ -43,7 +74,7 @@ describe('writer export import', () => {
 			const file = app.vault.getFileByPath('Substack import/123.first-post.md');
 			return { errors, text: file ? await app.vault.read(file) : '' };
 		}, example);
-		expect(state.errors[0]).toContain('folder exists'); expect(state.errors[1]).toContain('need Pro'); expect(state.errors[2]).toContain('needs Pro'); expect(state.text).toContain('A local archive');
+		expect(state.errors[0]).toContain('folder exists'); expect(state.errors[1]).toBe('Error: Pro saves and loads field mappings and folder profiles. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.errors[2]).toBe('Error: Pro compares post bodies with an earlier import. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.text).toContain('A local archive');
 	});
 
 	it('preserves a podcast URL without loading a player', async () => {

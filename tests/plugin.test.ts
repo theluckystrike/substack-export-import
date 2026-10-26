@@ -98,14 +98,14 @@ describe('Pro features and settings', () => {
 	it('loads and repairs local settings', async () => { const p = plugin(); await p.loadSettings(); expect(p.settings).toEqual(DEFAULT_SETTINGS); expect(normalizeSettings({ profiles: [null, { name: 'bad', folder: '../x', mapping: DEFAULT_MAPPING }] })).toEqual(DEFAULT_SETTINGS); });
 	it('uses the reference GitHub Sponsors price and client', () => expect(SPONSORS).toMatchObject({ clientId: 'Ov23lic5UPGPZqhBlBGg', sponsorLogin: 'theluckystrike', minMonthlyUsd: 5, oneTimeUsd: 15, oneTimeMonths: 0, scope: 'read:user' }));
 	it('guards saved profile writes and reads without Pro', async () => {
-		const p = plugin(); const save = vi.spyOn(p, 'saveData'); await expect(p.saveProfile({ name: 'Writer', folder: 'Archive', mapping: DEFAULT_MAPPING })).rejects.toThrow('need Pro'); expect(save).not.toHaveBeenCalled(); expect(() => p.loadProfile('Writer')).toThrow('need Pro');
+		const p = plugin(); const save = vi.spyOn(p, 'saveData'); await expect(p.saveProfile({ name: 'Writer', folder: 'Archive', mapping: DEFAULT_MAPPING })).rejects.toThrow('Pro saves and loads field mappings and folder profiles. Sponsor on GitHub, then sign in from the plugin settings.'); expect(save).not.toHaveBeenCalled(); expect(() => p.loadProfile('Writer')).toThrow('Pro saves and loads field mappings and folder profiles. Sponsor on GitHub');
 	});
 	it('saves and reloads a Pro profile', async () => {
 		pro(); const p = plugin(); await p.saveProfile({ name: 'Writer', folder: 'Archive', mapping: { ...DEFAULT_MAPPING, title: 'headline' } });
 		await p.loadSettings(); expect(p.loadProfile('Writer').mapping.title).toBe('headline');
 	});
 	it('guards comparison before it reads a snapshot', async () => {
-		const p = plugin(); const read = vi.spyOn(p.app.vault, 'read'); await expect(p.compareImport('Old', preview())).rejects.toThrow('needs Pro'); expect(read).not.toHaveBeenCalled();
+		const p = plugin(); const read = vi.spyOn(p.app.vault, 'read'); await expect(p.compareImport('Old', preview())).rejects.toThrow('Pro compares post bodies with an earlier import. Sponsor on GitHub, then sign in from the plugin settings.'); expect(read).not.toHaveBeenCalled();
 	});
 	it('compares a local import by ID and shows changed bodies', async () => {
 		pro(); const p = plugin(); await p.writeImport(preview(), 'Old');

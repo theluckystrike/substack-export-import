@@ -1,7 +1,8 @@
 import { Modal, Notice, Setting } from 'obsidian';
+import { showProNotice } from './license/github-obsidian';
 import type SubstackExportImportPlugin from './main';
 import { DEFAULT_MAPPING, FIELDS, makeReport, validateMapping, type Change, type Mapping, type Preview } from './importer';
-import { PRO_UI, isPro, onProChange } from './pro';
+import { PRO_COMPARE, PRO_PROFILES, PRO_UI, isPro, onProChange } from './pro';
 
 export class ImportModal extends Modal {
 	folder = 'Substack import';
@@ -88,7 +89,9 @@ export class ImportModal extends Modal {
 	private profileControls(el: HTMLElement): void {
 		new Setting(el).setName(PRO_UI.profileHeading).setHeading();
 		let name = '';
-		new Setting(el).setName('Profile name').addText((t) => t.setPlaceholder('Publication archive').onChange((v) => { name = v; })).addButton((b) => b.setButtonText('Save profile').setDisabled(!isPro() || this.importBusy).onClick(async () => {
+		new Setting(el).setName('Profile name').addText((t) => t.setPlaceholder('Publication archive').onChange((v) => { name = v; })).addButton((b) => b.setButtonText('Save profile').setDisabled(this.importBusy).onClick(async () => {
+			// Free users can select the button: it shows what Pro adds and how to get it.
+			if (!isPro()) { showProNotice(this.owner.pro, PRO_PROFILES); return; }
 			try { validateMapping(this.mapping); await this.owner.saveProfile({ name, folder: this.folder, mapping: this.mapping }); new Notice('Saved the local profile.'); this.draw(); }
 			catch (e) { this.showError(e); }
 		}));
@@ -97,7 +100,8 @@ export class ImportModal extends Modal {
 			if (!chosen) d.addOption('', 'No saved profiles');
 			for (const p of this.owner.settings.profiles) d.addOption(p.name, p.name);
 			d.setValue(chosen).setDisabled(!isPro() || this.importBusy).onChange((value) => { chosen = value; });
-		}).addButton((b) => b.setButtonText('Load profile').setDisabled(!isPro() || !chosen || this.importBusy).onClick(() => {
+		}).addButton((b) => b.setButtonText('Load profile').setDisabled(!chosen || this.importBusy).onClick(() => {
+			if (!isPro()) { showProNotice(this.owner.pro, PRO_PROFILES); return; }
 			try { const p = this.owner.loadProfile(chosen); this.folder = p.folder; this.mapping = p.mapping; this.preview = null; this.draw(); }
 			catch (e) { this.showError(e); }
 		}));
@@ -105,9 +109,9 @@ export class ImportModal extends Modal {
 	private comparisonControls(el: HTMLElement): void {
 		new Setting(el).setName(PRO_UI.comparisonHeading).setHeading();
 		let previous = '';
-		new Setting(el).setName('Previous import folder').setDesc('Read the local snapshot in this folder. Existing notes are not changed.').addText((t) => t.setPlaceholder('Previous export').onChange((v) => { previous = v; })).addButton((b) => b.setButtonText('Compare bodies').setDisabled(!isPro() || !this.preview || this.importBusy).onClick(async () => {
+		new Setting(el).setName('Previous import folder').setDesc('Read the local snapshot in this folder. Existing notes are not changed.').addText((t) => t.setPlaceholder('Previous export').onChange((v) => { previous = v; })).addButton((b) => b.setButtonText('Compare bodies').setDisabled(!this.preview || this.importBusy).onClick(async () => {
+			if (!isPro()) { showProNotice(this.owner.pro, PRO_COMPARE); return; }
 			try {
-				if (!isPro()) throw new Error('Body comparison needs Pro.');
 				const preview = this.preview; if (!preview) throw new Error('Preview an export first.');
 				const changes = await this.owner.compareImport(previous, preview);
 				if (!isPro() || this.importClosed) return;

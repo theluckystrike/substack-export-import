@@ -1,7 +1,7 @@
 import { Notice, Plugin, TFile, TFolder, normalizePath, stringifyYaml } from 'obsidian';
-import { createGitHubSponsors } from './license/github-obsidian';
+import { createGitHubSponsors, proNeededText } from './license/github-obsidian';
 import type { SponsorsManager } from './license/index';
-import { SPONSORS, bindPro, isPro, resetPro } from './pro';
+import { PRO_COMPARE, PRO_PROFILES, SPONSORS, bindPro, isPro, resetPro } from './pro';
 import { DEFAULT_MAPPING, compareBodies, parseSnapshot, makeReport, makeSnapshot, prepareImport, readArchive, validateFolder, validateMapping, type Change, type Mapping, type Preview } from './importer';
 import { convertBody } from './convert';
 import { DEFAULT_SETTINGS, normalizeSettings, SubstackExportImportSettingTab, type Profile, type SubstackExportImportSettings } from './settings';
@@ -37,7 +37,7 @@ export default class SubstackExportImportPlugin extends Plugin {
 	async saveSettings(): Promise<void> { await this.saveData(this.settings); }
 	prepare(bytes: Uint8Array, mapping: Mapping = DEFAULT_MAPPING): Preview { return prepareImport(readArchive(bytes), convertBody, mapping); }
 	async saveProfile(profile: Profile): Promise<void> {
-		if (!isPro()) throw new Error('Saved profiles need Pro. Sign in with GitHub in the plugin settings.');
+		if (!isPro()) throw new Error(proNeededText(this.pro, PRO_PROFILES));
 		validateFolder(profile.folder); validateMapping(profile.mapping);
 		const name = profile.name.trim();
 		if (!name || name.length > 80) throw new Error('Use a profile name with 1 to 80 characters.');
@@ -48,18 +48,18 @@ export default class SubstackExportImportPlugin extends Plugin {
 		this.settings = { profiles };
 	}
 	loadProfile(name: string): Profile {
-		if (!isPro()) throw new Error('Saved profiles need Pro.');
+		if (!isPro()) throw new Error(proNeededText(this.pro, PRO_PROFILES));
 		const profile = this.settings.profiles.find((p) => p.name === name);
 		if (!profile) throw new Error('The profile was not found.');
 		return { ...profile, mapping: { ...profile.mapping } };
 	}
 	async compareImport(previous: string, preview: Preview): Promise<Change[]> {
-		if (!isPro()) throw new Error('Body comparison needs Pro.');
+		if (!isPro()) throw new Error(proNeededText(this.pro, PRO_COMPARE));
 		validateFolder(previous);
 		const file = this.app.vault.getAbstractFileByPath(normalizePath(`${previous}/_substack-snapshot.json`));
 		if (!(file instanceof TFile)) throw new Error('The previous import snapshot was not found.');
 		const snapshot = parseSnapshot(await this.app.vault.read(file));
-		if (!isPro()) throw new Error('Body comparison needs Pro.');
+		if (!isPro()) throw new Error(proNeededText(this.pro, PRO_COMPARE));
 		return compareBodies(snapshot, preview);
 	}
 	checkFolder(input: string): string {

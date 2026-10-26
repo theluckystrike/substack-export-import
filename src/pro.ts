@@ -21,6 +21,10 @@ export const PRO_UI = {
 	priceText: 'Sponsor $5 a month, or $15 once. When you have paid $15 in total, Pro stays on.',
 };
 
+/** First sentences of the Pro gates. proNeededText and showProNotice add the next step for this user. */
+export const PRO_PROFILES = 'Pro saves and loads field mappings and folder profiles.';
+export const PRO_COMPARE = 'Pro compares post bodies with an earlier import.';
+
 type Listener = () => void;
 
 let manager: SponsorsManager | null = null;

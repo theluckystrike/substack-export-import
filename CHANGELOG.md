@@ -1,5 +1,13 @@
 # substack-export-import
 
+## 1.1.1
+
+### Patch Changes
+
+- Save profile, Load profile and Compare bodies now show how to get Pro, with a Sponsor on GitHub button.
+- The Sponsor on GitHub button adds the plugin id to the GitHub address, so a sponsorship shows its source.
+- If GitHub has said you sponsor, or your first check still runs, no Sponsor button shows.
+
 ## 1.1.0
 
 ### Minor Changes
