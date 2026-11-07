@@ -23,12 +23,12 @@ describe('writer export import', () => {
 		await browser.$('button=Save profile').click();
 		await browser.waitUntil(async () => (await notices()).some((n) => n.text.includes('Pro saves and loads')), { timeout: 5000, timeoutMsg: 'No Pro notice after Save profile.' });
 		const save = (await notices()).find((n) => n.text.includes('Pro saves and loads'))!;
-		expect(save.text).toContain('Pro saves and loads field mappings and folder profiles. Sponsor on GitHub, then sign in from the plugin settings.');
+		expect(save.text).toContain('Pro saves and loads field mappings and folder profiles. One payment turns on Pro in every NoteMods plugin. Sponsor on GitHub, then sign in from the plugin settings.');
 		expect(save.buttons).toBe(1);
 		await browser.$('button=Compare bodies').click();
 		await browser.waitUntil(async () => (await notices()).some((n) => n.text.includes('Pro compares post bodies')), { timeout: 5000, timeoutMsg: 'No Pro notice after Compare bodies.' });
 		const compare = (await notices()).find((n) => n.text.includes('Pro compares post bodies'))!;
-		expect(compare.text).toContain('Pro compares post bodies with an earlier import. Sponsor on GitHub, then sign in from the plugin settings.');
+		expect(compare.text).toContain('Pro compares post bodies with an earlier import. One payment turns on Pro in every NoteMods plugin. Sponsor on GitHub, then sign in from the plugin settings.');
 		expect(compare.buttons).toBe(1);
 		const after = await browser.executeObsidian(({ app }) => {
 			const p = (app as unknown as { plugins: { plugins: Record<string, Plugin> } }).plugins.plugins['substack-export-import']!;
@@ -74,7 +74,7 @@ describe('writer export import', () => {
 			const file = app.vault.getFileByPath('Substack import/123.first-post.md');
 			return { errors, text: file ? await app.vault.read(file) : '' };
 		}, example);
-		expect(state.errors[0]).toContain('folder exists'); expect(state.errors[1]).toBe('Error: Pro saves and loads field mappings and folder profiles. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.errors[2]).toBe('Error: Pro compares post bodies with an earlier import. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.text).toContain('A local archive');
+		expect(state.errors[0]).toContain('folder exists'); expect(state.errors[1]).toBe('Error: Pro saves and loads field mappings and folder profiles. One payment turns on Pro in every NoteMods plugin. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.errors[2]).toBe('Error: Pro compares post bodies with an earlier import. One payment turns on Pro in every NoteMods plugin. Sponsor on GitHub, then sign in from the plugin settings.'); expect(state.text).toContain('A local archive');
 	});
 
 	it('preserves a podcast URL without loading a player', async () => {
